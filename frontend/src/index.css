@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-primary text-gold font-body;
+  background-image: url('/assets/textures/stone-bg.jpg');
+  background-size: cover;
+  background-attachment: fixed;
+}
