@@ -1,312 +1,284 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-scroll";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Crown, Flame } from "lucide-react";
+import { Menu, X } from "lucide-react";
+
+const NAV_ITEMS = [
+  { name: "Hero",     to: 'hero',     roman: 'I'   },
+  { name: 'About',    to: 'about',    roman: 'II'  },
+  { name: 'Skills',   to: 'skills',   roman: 'III' },
+  { name: 'Projects', to: 'projects', roman: 'IV'  },
+  { name: 'Contact',  to: 'contact',  roman: 'V'   },
+];
+
+/* Compact hex sigil for logo */
+const LogoSigil = () => (
+  <svg viewBox="0 0 36 36" className="w-7 h-7 shrink-0">
+    <polygon points="18,2 34,10 34,26 18,34 2,26 2,10"
+      fill="none" stroke="#c9a84c" strokeWidth="1.4" />
+    <polygon points="18,8 28,13 28,23 18,28 8,23 8,13"
+      fill="none" stroke="#c9a84c" strokeWidth="0.6" opacity="0.4" />
+    {/* Flame centre */}
+    <path d="M18 26 Q13 22 14 17 Q16 13 18 11 Q20 13 22 17 Q23 22 18 26Z"
+      fill="none" stroke="#e07b2a" strokeWidth="1.5" strokeLinecap="round" />
+    <circle cx="18" cy="18" r="1.8" fill="#f59e0b" opacity="0.9" />
+    {[[18,2],[34,10],[34,26],[18,34],[2,26],[2,10]].map(([cx,cy],i) => (
+      <circle key={i} cx={cx} cy={cy} r="1.6" fill="#c9a84c" />
+    ))}
+  </svg>
+);
 
 export const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("hero");
-
-  const navItems = [
-    { name: "Hero", icon: Crown },
-    { name: "About", icon: Flame },
-    { name: "Skills", icon: Flame },
-    { name: "Projects", icon: Flame },
-    { name: "Contact", icon: Flame }
-  ];
+  const [scrolled, setScrolled]   = useState(false);
+  const [active, setActive]       = useState('hero');
+  const [menuOpen, setMenuOpen]   = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Close mobile menu when clicking outside
+  /* Close drawer on outside click */
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (isMobileMenuOpen) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    if (isMobileMenuOpen) {
-      document.addEventListener("click", handleClickOutside);
-    }
-
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [isMobileMenuOpen]);
+    if (!menuOpen) return;
+    const close = () => setMenuOpen(false);
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, [menuOpen]);
 
   return (
     <>
       <motion.nav
-        initial={{ y: -100 }}
+        initial={{ y: -80 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          isScrolled
-            ? "bg-slate-900/95 backdrop-blur-md shadow-2xl shadow-amber-500/10 border-b border-amber-500/20"
-            : "bg-slate-900/80 backdrop-blur-sm"
-        }`}
+        transition={{ duration: 0.7, ease: 'easeOut' }}
+        className="fixed top-0 inset-x-0 z-50"
+        style={{
+          background: scrolled
+            ? 'rgba(6,4,2,0.92)'
+            : 'rgba(6,4,2,0.55)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: scrolled
+            ? '1px solid rgba(201,168,76,0.22)'
+            : '1px solid transparent',
+          transition: 'all 0.4s ease',
+        }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 sm:h-20">
-            {/* Logo/Brand */}
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              className="flex items-center gap-3 cursor-pointer group"
-            >
-              {/* Animated Crown Icon */}
-              <motion.div
-                animate={{
-                  rotate: [0, 10, -10, 0],
+        <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16">
+
+          {/* ── Logo ── */}
+          <Link to="hero" smooth duration={600} className="cursor-pointer">
+            <motion.div whileHover={{ scale: 1.03 }} className="flex items-center gap-2.5">
+              <LogoSigil />
+              <span
+                className="text-xl font-bold hidden sm:block"
+                style={{
+                  fontFamily:"'Cinzel Decorative','Cinzel',serif",
+                  background:'linear-gradient(135deg,#fde68a,#c9a84c,#92661a)',
+                  WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+                  letterSpacing:'0.04em',
                 }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="relative"
               >
-                <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-amber-500 group-hover:text-amber-400 transition-colors" />
-                <motion.div
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.5, 0.8, 0.5],
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                  }}
-                  className="absolute inset-0 bg-amber-500 rounded-full blur-md -z-10"
-                />
-              </motion.div>
-
-              {/* Name */}
-              <Link to="hero" smooth={true} duration={500}>
-                <h1
-                  className="text-xl sm:text-2xl lg:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 group-hover:from-amber-300 group-hover:via-amber-500 group-hover:to-amber-700 transition-all duration-300"
-                  style={{
-                    fontFamily: "Cinzel, serif",
-                    textShadow: "0 0 20px rgba(217, 119, 6, 0.3)",
-                  }}
-                >
-                  Abdul Aahad
-                </h1>
-              </Link>
+                Abdul Aahad
+              </span>
+              <span
+                className="text-lg font-bold sm:hidden"
+                style={{
+                  fontFamily:"'Cinzel','serif'",
+                  background:'linear-gradient(135deg,#fde68a,#c9a84c)',
+                  WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+                }}
+              >
+                Abdul Aahad
+              </span>
             </motion.div>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <ul className="hidden md:flex items-center space-x-1 lg:space-x-2">
-              {navItems.map((item, index) => (
-                <motion.li
-                  key={item.name}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
+          {/* ── Desktop nav ── */}
+          <ul className="hidden md:flex items-center gap-1">
+            {NAV_ITEMS.map((item, i) => {
+              const isActive = active === item.to;
+              return (
+                <motion.li key={item.to}
+                  initial={{ opacity:0, y:-12 }} animate={{ opacity:1, y:0 }}
+                  transition={{ delay: i * 0.08 }}>
                   <Link
-                    to={item.name.toLowerCase()}
-                    smooth={true}
-                    duration={500}
-                    spy={true}
-                    offset={-80}
-                    onSetActive={() => setActiveSection(item.name.toLowerCase())}
-                    className="group relative"
+                    to={item.to} smooth duration={600} offset={-80} spy
+                    onSetActive={() => setActive(item.to)}
+                    className="relative flex flex-col items-center px-4 py-2 cursor-pointer group"
                   >
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`px-4 lg:px-5 py-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                        activeSection === item.name.toLowerCase()
-                          ? "bg-amber-500/20 text-amber-300"
-                          : "text-slate-300 hover:text-amber-400 hover:bg-amber-500/10"
-                      }`}
-                      style={{ fontFamily: "Cinzel, serif" }}
+                    {/* Roman numeral */}
+                    <span className="text-[8px] tracking-widest mb-0.5 transition-colors duration-300"
+                      style={{
+                        fontFamily:'Cinzel,serif',
+                        color: isActive ? '#c9a84c' : 'rgba(201,168,76,0.3)',
+                      }}>
+                      {item.roman}
+                    </span>
+                    {/* Label */}
+                    <span className="text-xs tracking-[0.15em] uppercase font-semibold transition-colors duration-300"
+                      style={{
+                        fontFamily:'Cinzel,serif',
+                        color: isActive ? '#e8c96a' : '#6b5a3e',
+                      }}
+                      onMouseEnter={e => { if (!isActive) e.target.style.color='#c9a84c'; }}
+                      onMouseLeave={e => { if (!isActive) e.target.style.color='#6b5a3e'; }}
                     >
-                      <span className="font-semibold text-sm lg:text-base">
-                        {item.name}
-                      </span>
-                    </motion.div>
-
-                    {/* Active indicator */}
-                    {activeSection === item.name.toLowerCase() && (
-                      <motion.div
-                        layoutId="activeSection"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-amber-500 to-transparent"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                      />
-                    )}
-
-                    {/* Hover glow effect */}
+                      {item.name}
+                    </span>
+                    {/* Ink-draw underline */}
                     <motion.div
-                      className="absolute inset-0 bg-amber-500 rounded-lg blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10"
+                      className="absolute bottom-0 left-0 right-0 h-px"
+                      style={{ background:'linear-gradient(90deg,transparent,#c9a84c,transparent)' }}
+                      initial={false}
+                      animate={{ scaleX: isActive ? 1 : 0 }}
+                      transition={{ duration: 0.35 }}
                     />
                   </Link>
                 </motion.li>
-              ))}
-            </ul>
+              );
+            })}
 
-            {/* Mobile Menu Button */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsMobileMenuOpen(!isMobileMenuOpen);
-              }}
-              className="md:hidden p-2 rounded-lg bg-amber-500/20 border border-amber-500/30 hover:bg-amber-500/30 transition-all duration-300"
-              aria-label="Toggle menu"
-            >
-              <AnimatePresence mode="wait">
-                {isMobileMenuOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <X className="w-6 h-6 text-amber-400" />
+            {/* CTA hire button */}
+            <motion.li
+              initial={{ opacity:0 }} animate={{ opacity:1 }}
+              transition={{ delay: 0.4 }}>
+              <Link to="contact" smooth duration={600} offset={-80}>
+                <motion.span
+                  whileHover={{ scale:1.04 }} whileTap={{ scale:0.97 }}
+                  className="ml-3 inline-block px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase cursor-pointer"
+                  style={{
+                    fontFamily:'Cinzel,serif',
+                    background:'linear-gradient(135deg,#c9a84c,#a07828)',
+                    color:'#0a0704',
+                    boxShadow:'0 0 14px rgba(201,168,76,0.25)',
+                  }}>
+                  Hire Me
+                </motion.span>
+              </Link>
+            </motion.li>
+          </ul>
+
+          {/* ── Mobile toggle ── */}
+          <motion.button
+            whileTap={{ scale:0.9 }}
+            onClick={e => { e.stopPropagation(); setMenuOpen(v => !v); }}
+            className="md:hidden flex items-center justify-center w-9 h-9"
+            style={{ border:'1px solid rgba(201,168,76,0.3)', background:'rgba(201,168,76,0.06)' }}
+            aria-label="Toggle menu"
+          >
+            <AnimatePresence mode="wait">
+              {menuOpen
+                ? <motion.div key="x" initial={{ rotate:-90, opacity:0 }} animate={{ rotate:0, opacity:1 }} exit={{ rotate:90, opacity:0 }} transition={{ duration:0.2 }}>
+                    <X className="w-5 h-5" style={{ color:'#c9a84c' }} />
                   </motion.div>
-                ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Menu className="w-6 h-6 text-amber-400" />
+                : <motion.div key="m" initial={{ rotate:90, opacity:0 }} animate={{ rotate:0, opacity:1 }} exit={{ rotate:-90, opacity:0 }} transition={{ duration:0.2 }}>
+                    <Menu className="w-5 h-5" style={{ color:'#c9a84c' }} />
                   </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          </div>
+              }
+            </AnimatePresence>
+          </motion.button>
         </div>
 
-        {/* Decorative bottom border */}
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: isScrolled ? 1 : 0 }}
-          transition={{ duration: 0.3 }}
-          className="h-px bg-gradient-to-r from-transparent via-amber-500 to-transparent"
-        />
+        {/* Scrolled gold rule */}
+        <motion.div className="h-px w-full"
+          animate={{ opacity: scrolled ? 1 : 0 }}
+          style={{ background:'linear-gradient(90deg,transparent,#c9a84c55,transparent)', transition:'opacity 0.4s' }} />
       </motion.nav>
 
-      {/* Mobile Menu Overlay */}
+      {/* ── Mobile drawer ── */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
+        {menuOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
+              key="backdrop"
+              initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+              className="fixed inset-0 z-40 md:hidden"
+              style={{ background:'rgba(0,0,0,0.65)', backdropFilter:'blur(4px)' }}
+              onClick={() => setMenuOpen(false)}
             />
 
-            {/* Mobile Menu */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              onClick={(e) => e.stopPropagation()}
-              className="fixed top-16 sm:top-20 right-0 bottom-0 w-64 sm:w-80 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 border-l-2 border-amber-500/30 shadow-2xl z-40 md:hidden overflow-y-auto"
+            <motion.aside
+              key="drawer"
+              initial={{ x:'100%' }} animate={{ x:0 }} exit={{ x:'100%' }}
+              transition={{ type:'spring', damping:28, stiffness:220 }}
+              onClick={e => e.stopPropagation()}
+              className="fixed top-16 right-0 bottom-0 w-72 z-40 md:hidden overflow-y-auto"
+              style={{
+                background:'linear-gradient(160deg,rgba(12,8,3,0.99),rgba(6,4,2,0.99))',
+                borderLeft:'1px solid rgba(201,168,76,0.22)',
+              }}
             >
-              {/* Decorative pattern */}
-              <div
-                className="absolute inset-0 opacity-5"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 10 L35 25 L50 25 L38 35 L43 50 L30 40 L17 50 L22 35 L10 25 L25 25 Z' fill='%23d97706'/%3E%3C/svg%3E")`,
-                  backgroundSize: "80px 80px",
-                }}
-              />
+              {/* Grain */}
+              <div className="absolute inset-0 opacity-[0.05] pointer-events-none"
+                style={{ backgroundImage:`url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4'/></filter><rect width='200' height='200' filter='url(#n)'/></svg>`)}")` }} />
 
-              <div className="relative p-6">
-                {/* Mobile Menu Header */}
-                <div className="mb-6 pb-6 border-b border-amber-500/20">
-                  <h2
-                    className="text-xl font-bold text-amber-400 flex items-center gap-2"
-                    style={{ fontFamily: "Cinzel, serif" }}
-                  >
-                    <Flame className="w-5 h-5" />
-                    Navigation
-                  </h2>
+              <div className="relative p-7">
+                {/* Drawer header */}
+                <div className="mb-6 pb-5" style={{ borderBottom:'1px solid rgba(201,168,76,0.15)' }}>
+                  <p className="text-[9px] tracking-[0.4em] uppercase"
+                    style={{ fontFamily:'Cinzel,serif', color:'#c9a84c66' }}>
+                    Navigation · House Developer
+                  </p>
                 </div>
 
-                {/* Mobile Menu Items */}
-                <ul className="space-y-2">
-                  {navItems.map((item, index) => {
-                    const Icon = item.icon;
+                {/* Items */}
+                <ul className="space-y-1">
+                  {NAV_ITEMS.map((item, i) => {
+                    const isActive = active === item.to;
                     return (
-                      <motion.li
-                        key={item.name}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.3, delay: index * 0.05 }}
-                      >
+                      <motion.li key={item.to}
+                        initial={{ opacity:0, x:20 }} animate={{ opacity:1, x:0 }}
+                        transition={{ delay: i * 0.06 }}>
                         <Link
-                          to={item.name.toLowerCase()}
-                          smooth={true}
-                          duration={500}
-                          spy={true}
-                          offset={-80}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          onSetActive={() => setActiveSection(item.name.toLowerCase())}
+                          to={item.to} smooth duration={600} offset={-80} spy
+                          onSetActive={() => setActive(item.to)}
+                          onClick={() => setMenuOpen(false)}
                         >
-                          <motion.div
-                            whileTap={{ scale: 0.95 }}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition-all duration-300 ${
-                              activeSection === item.name.toLowerCase()
-                                ? "bg-amber-500/20 border-l-4 border-amber-500 text-amber-300"
-                                : "text-slate-300 hover:text-amber-400 hover:bg-amber-500/10 border-l-4 border-transparent hover:border-amber-500/50"
-                            }`}
-                          >
-                            <Icon className="w-5 h-5" />
-                            <span
-                              className="font-semibold"
-                              style={{ fontFamily: "Cinzel, serif" }}
-                            >
+                          <div className="flex items-center gap-4 px-3 py-3 cursor-pointer transition-all duration-300"
+                            style={{
+                              borderLeft: `2px solid ${isActive ? '#c9a84c' : 'transparent'}`,
+                              background: isActive ? 'rgba(201,168,76,0.07)' : 'transparent',
+                            }}>
+                            <span className="text-[9px] w-5 text-right shrink-0"
+                              style={{ fontFamily:'Cinzel,serif', color:'#c9a84c55' }}>
+                              {item.roman}
+                            </span>
+                            <span className="text-sm font-semibold tracking-[0.12em] uppercase"
+                              style={{ fontFamily:'Cinzel,serif', color: isActive ? '#e8c96a' : '#7a6640' }}>
                               {item.name}
                             </span>
-                          </motion.div>
+                          </div>
                         </Link>
                       </motion.li>
                     );
                   })}
                 </ul>
 
-                {/* Mobile Menu Footer */}
+                {/* Drawer footer */}
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-8 pt-6 border-t border-amber-500/20"
-                >
-                  <p className="text-slate-400 text-sm text-center italic">
-                    "Winter is Coming"
-                  </p>
-                  <p className="text-amber-500 text-xs text-center mt-2" style={{ fontFamily: "Cinzel, serif" }}>
+                  initial={{ opacity:0 }} animate={{ opacity:1 }}
+                  transition={{ delay:0.35 }}
+                  className="mt-10 pt-6 text-center"
+                  style={{ borderTop:'1px solid rgba(201,168,76,0.12)' }}>
+                  <p className="text-[10px] tracking-[0.25em] uppercase mb-1"
+                    style={{ fontFamily:'Cinzel,serif', color:'#c9a84c44' }}>
                     House Developer
+                  </p>
+                  <p className="text-xs italic"
+                    style={{ fontFamily:'Cormorant Garamond,Georgia,serif', color:'#4a3a22' }}>
+                    "Building kingdoms with code"
                   </p>
                 </motion.div>
               </div>
-            </motion.div>
+            </motion.aside>
           </>
         )}
       </AnimatePresence>
 
-      {/* Import Cinzel font */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=Cormorant+Garamond:ital,wght@0,400;1,300;1,400;1,600&display=swap');
       `}</style>
     </>
   );
